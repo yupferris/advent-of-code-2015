@@ -2,7 +2,7 @@ use std::io::Read;
 use std::fs::File;
 
 fn main() {
-    let mut f = File::open("input.txt").unwrap();
+    let mut f = File::open("../input.txt").unwrap();
     let mut s = String::new();
     f.read_to_string(&mut s).ok();
     let s = s;
