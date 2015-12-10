@@ -12,23 +12,12 @@ fn main() {
     let answer: i32 = s.lines().map(|x| {
         let char_num = x.len() as i32;
 
-        let mut encoded_chars = 2;
-        let mut index = 0;
-        let chars = x.chars().collect::<Vec<_>>();
-        while index < x.len() {
-            match chars[index] {
-                '"' | '\\' => {
-                    encoded_chars += 2;
-                    index += 1;
-                },
-                _ => {
-                    encoded_chars += 1;
-                    index += 1;
-                }
-            }
-        }
+        let encoded_chars: i32 = x.chars().map(|x| match x {
+            '"' | '\\' => 2,
+            _ => 1
+        }).sum();
 
-        encoded_chars - char_num
+        encoded_chars + 2 - char_num
     }).sum();
 
     println!("The answer is {} :D", answer);
