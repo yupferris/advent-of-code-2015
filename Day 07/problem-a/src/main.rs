@@ -1,3 +1,5 @@
+#![feature(slice_patterns)]
+
 #[macro_use]
 extern crate nom;
 
@@ -6,9 +8,10 @@ use std::fs::File;
 use std::str;
 use std::str::FromStr;
 
-use nom::{digit, multispace, alpha};
+use std::collections::HashMap;
 
-#[derive(Debug)]
+use nom::{IResult, digit, multispace, alpha};
+
 enum Op {
     And,
     Or,
@@ -16,7 +19,6 @@ enum Op {
     RShift
 }
 
-#[derive(Debug)]
 enum Expr {
     Const(u16),
     Ref(String),
@@ -24,21 +26,14 @@ enum Expr {
     BinOp(Op, Box<Expr>, Box<Expr>)
 }
 
-#[derive(Debug)]
-struct Connection {
-    input: Box<Expr>,
-    output: String
-}
+type Connection = (String, Box<Expr>);
 
 named!(connection_parser<Connection>,
        chain!(
            input: expr_parser ~
                delimited!(opt!(multispace), tag!("->"), opt!(multispace)) ~
-               output: string_parser,
-           || { Connection {
-               input: Box::new(input),
-               output: output
-           } }));
+               name: string_parser,
+           || { (name, Box::new(input)) }));
 
 named!(string_parser<String>,
        map_res!(
@@ -48,7 +43,7 @@ named!(string_parser<String>,
 named!(expr_parser<Expr>,
        alt!(
            expr_not_op_parser |
-           expr_bin_op_parser |
+           complete!(expr_bin_op_parser) |
            expr_term_parser));
 
 named!(expr_not_op_parser<Expr>,
@@ -103,8 +98,53 @@ fn main() {
     f.read_to_string(&mut s).ok();
     let s = s;
 
-    let connections = s.lines().map(|x| connection_parser(x.as_bytes())).collect::<Vec<_>>();
-    for c in connections {
-        println!("{:?}", c);
+    let connections = s.lines().map(|x| {
+        match connection_parser(x.as_bytes()) {
+            IResult::Done([], c) => c,
+            _ => unreachable!()
+        }
+    }).collect::<HashMap<_, _>>();
+
+    let mut wires: HashMap<String, Option<u16>> = HashMap::new();
+    for (name, _) in connections.iter() {
+        wires.insert(name.clone(), None);
+    }
+
+    loop {
+        let mut finished = true;
+
+        for (name, expr) in connections.iter() {
+            if let &None = wires.get(name).unwrap() {
+                match evaluate_expr(&wires, &connections, expr) {
+                    None => { finished = false; },
+                    x => { *wires.get_mut(name).unwrap() = x; }
+                }
+            }
+        }
+
+        if finished {
+            break;
+        }
+    }
+
+    println!("The value on wire a is {} :D", wires.get("a").unwrap().unwrap());
+}
+
+fn evaluate_expr(wires: &HashMap<String, Option<u16>>, connections: &HashMap<String, Box<Expr>>, expr: &Expr) -> Option<u16> {
+    match expr {
+        &Expr::Const(x) => Some(x),
+        &Expr::Ref(ref name) => wires.get(name).unwrap().clone(),
+        &Expr::NotOp(ref sub_expr) => evaluate_expr(wires, connections, sub_expr).map(|x| !x),
+        &Expr::BinOp(ref op, ref lhs, ref rhs) => {
+            match (evaluate_expr(wires, connections, lhs), evaluate_expr(wires, connections, rhs)) {
+                (Some(lhs_value), Some(rhs_value)) => Some(match op {
+                    &Op::And => lhs_value & rhs_value,
+                    &Op::Or => lhs_value | rhs_value,
+                    &Op::LShift => lhs_value << rhs_value,
+                    &Op::RShift => lhs_value >> rhs_value
+                }),
+                _ => None
+            }
+        }
     }
 }
