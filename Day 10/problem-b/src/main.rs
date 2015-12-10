@@ -34,7 +34,7 @@ fn look_and_say(s: String) -> String {
     }
 
     if let Some((c, length)) = current_run {
-        ret = format!("{}{}{}", ret, length, c);
+        ret = ret + &format!("{}{}", length, c);
     }
 
     ret
