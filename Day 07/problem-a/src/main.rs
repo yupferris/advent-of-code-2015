@@ -105,7 +105,7 @@ fn main() {
         }
     }).collect::<HashMap<_, _>>();
 
-    let mut wires: HashMap<String, Option<u16>> = HashMap::new();
+    let mut wires = HashMap::new();
     for (name, _) in connections.iter() {
         wires.insert(name.clone(), None);
     }
