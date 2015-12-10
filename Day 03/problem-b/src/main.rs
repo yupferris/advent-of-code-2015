@@ -42,18 +42,18 @@ fn main() {
 
     let mut houses = HashSet::new();
 
-    let mut santa = Santa::new(&mut houses);
-    let mut robo_santa = Santa::new(&mut houses);
-
     let santa_directions = s.chars().enumerate().filter_map(|(i, x)| if (i & 1) == 0 { Some(x) } else { None });
     let robo_santa_directions = s.chars().enumerate().filter_map(|(i, x)| if (i & 1) == 1 { Some(x) } else { None });
 
-    for c in santa_directions {
-        santa.move_and_visit(c, &mut houses);
-    }
-    for c in robo_santa_directions {
-        robo_santa.move_and_visit(c, &mut houses);
-    }
+    simulate_santa(santa_directions, &mut houses);
+    simulate_santa(robo_santa_directions, &mut houses);
 
     println!("{} house(s) received at least one present! :D", houses.len());
+}
+
+fn simulate_santa<I: Iterator<Item = char>>(directions: I, houses: &mut HashSet<Pos>) {
+    let mut santa = Santa::new(houses);
+    for c in directions {
+        santa.move_and_visit(c, houses);
+    }
 }
