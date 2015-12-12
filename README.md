@@ -12,6 +12,7 @@ I didn't hear about this until day 10, so I didn't start until then. Here are my
 | Day | Place (out of 100 listed) | Completion time |
 |---|---|---|
 | 11 | #58 | 00:17:06 |
+| 12 | #59 | 00:17:29 |
 
 ## License
 This code is licensed under the BSD2 license (see LICENSE).
