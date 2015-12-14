@@ -14,6 +14,7 @@ I didn't hear about this until day 10, so I didn't start until then. Here are my
 | 11 | #58 | 00:17:06 |
 | 12 | #59 | 00:17:29 |
 | 13 | N/A | ~00:30:00 |
+| 14 | #68 | 00:22:00 |
 
 ## License
 This code is licensed under the BSD2 license (see LICENSE).
