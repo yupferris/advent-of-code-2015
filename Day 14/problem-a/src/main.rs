@@ -27,16 +27,12 @@ fn main() {
         }
     }).collect::<Vec<_>>();
 
-    /*for d in reindeer {
-        println!("{:?}", d);
-}*/
-
     let time = 2503;
     let farthest = reindeer.iter().fold(0, |acc, x| {
         let mut distance = 0;
         let mut is_flying = true;
         let mut state_time = 0;
-        for i in 0..time {
+        for _ in 0..time {
             state_time += 1;
 
             if is_flying {
